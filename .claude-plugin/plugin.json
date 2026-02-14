@@ -1,0 +1,22 @@
+{
+  "name": "deepscan",
+  "version": "0.1.0",
+  "description": "Deep multi-file analysis plugin for complex tasks where standard context windows fail. Orchestrates parallel sub-agents for security, architecture, and performance analysis.",
+  "author": {
+    "name": "idnotbe",
+    "url": "https://github.com/idnotbe"
+  },
+  "skills": [
+    "./.claude/skills/deepscan"
+  ],
+  "homepage": "https://github.com/idnotbe/deepscan",
+  "repository": "https://github.com/idnotbe/deepscan",
+  "license": "MIT",
+  "keywords": [
+    "analysis",
+    "security-audit",
+    "architecture",
+    "multi-file",
+    "deep-scan"
+  ]
+}
