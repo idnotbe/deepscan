@@ -68,6 +68,30 @@ See the [skill documentation](.claude/skills/deepscan/SKILL.md) for the full com
 - **Model Escalation**: Automatic haiku to sonnet on quality failures
 - **Sandboxed REPL**: Multi-layer security for safe execution
 
+## Testing
+
+**No tests exist yet.** This is a critical gap for a plugin with security-sensitive code (sandboxed REPL execution, path traversal protection, AST validation).
+
+When tests are created:
+
+```bash
+# Run all tests
+pytest tests/
+
+# Run with coverage
+pytest tests/ --cov=.claude/skills/deepscan/scripts --cov-report=html
+```
+
+Security-critical components that need test coverage:
+- `repl_executor.py` -- sandboxed eval/exec, timeout enforcement
+- `deepscan_engine.py` -- forbidden patterns, AST whitelist, attribute blocking
+- `constants.py` -- SAFE_BUILTINS allowlist
+- `state_manager.py` -- path containment via `_safe_write()`
+- `walker.py` -- symlink safety, path traversal protection
+- `ast_chunker.py` -- project-root enforcement
+
+See [TEST-PLAN.md](TEST-PLAN.md) for the full prioritized test plan and [CLAUDE.md](CLAUDE.md) for developer guidance.
+
 ## Documentation
 
 - [SKILL.md](.claude/skills/deepscan/SKILL.md) - Full command reference
