@@ -1,3 +1,13 @@
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.mcp.json
+
+# Windows reserved filename artifact
+nul
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -134,8 +144,9 @@ celerybeat.pid
 # SageMath parsed files
 *.sage.py
 
-# Environments
+# Environment
 .env
+.env.*
 .envrc
 .venv
 env/
