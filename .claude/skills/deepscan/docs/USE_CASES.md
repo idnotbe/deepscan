@@ -292,7 +292,7 @@ Use the REPL for ad-hoc analysis between workflow steps:
 
 ```bash
 # Count files by extension
-exec -c "exts = {}; [exts.__setitem__(f.rsplit('.',1)[-1], exts.get(f.rsplit('.',1)[-1],0)+1) for f in get_status()['files']]; print(sorted(exts.items(), key=lambda x: -x[1]))"
+exec -c "status = get_status(); files = status['files']; exts = {}; \nfor f in files:\n    ext = f.rsplit('.',1)[-1] if '.' in f else 'none'\n    exts[ext] = exts.get(ext, 0) + 1\nprint(sorted(exts.items(), key=lambda x: -x[1]))"
 
 # Find the largest files in context
 exec -c "print(f'Context: {context_length():,} characters')"

@@ -33,6 +33,7 @@ Each sub-agent sees only its chunk, staying within optimal context limits. The a
 - **Python 3.10+** (uses `X | None` syntax)
 - **pydantic** (`pip install pydantic`)
 - **Claude Code** installed and working
+- **Poetry** (for CLI verification; `pip install poetry`) -- or use `python3` directly
 
 Optional: `tree-sitter-language-pack` (semantic chunking), `xxhash` (faster hashing), `rich` (styled errors), `psutil` (memory-aware chunking).
 

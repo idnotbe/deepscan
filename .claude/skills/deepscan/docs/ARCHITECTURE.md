@@ -334,7 +334,7 @@ deepscan init ./src --agent-type security -q "Find vulnerabilities"
 **To add new agent types:**
 1. Add type to `SUPPORTED_AGENT_TYPES` in `subagent_prompt.py`
 2. Add instructions to `AGENT_TYPE_INSTRUCTIONS` dict
-3. Update CLI choices in `deepscan_engine.py` init_parser (line 1431)
+3. Update CLI choices in `deepscan_engine.py` `init_parser` (search for `--agent-type` in `init_parser`)
 
 ### 7.2 Custom Chunking Strategies
 

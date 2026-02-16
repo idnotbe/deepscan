@@ -8,7 +8,7 @@
 |-------|-----------|----------|
 | Forbidden patterns | 15 regex patterns block dangerous strings | `deepscan_engine.py:345-361` |
 | AST whitelist | Only safe node types allowed | `deepscan_engine.py:382-441` |
-| Attribute blocking | 19 dangerous dunder attributes blocked | `deepscan_engine.py:453-459` |
+| Attribute blocking | 19 dangerous dunder attributes blocked | `deepscan_engine.py:451-462` |
 | Safe builtins | 36 allowed builtins (no `getattr`, `exec`, `open`) | `constants.py:109-148` |
 | Resource limits | 256MB/512MB memory, 60s/120s CPU (Unix only) | `repl_executor.py:82-94` |
 | Write isolation | Only `~/.claude/cache/deepscan/` writable | `state_manager.py:381-398` |
@@ -278,13 +278,13 @@ The random suffix uses `secrets.token_hex(8)` (cryptographically secure).
 
 Grep uses two-layer protection via `grep_utils.py`:
 
-1. **Heuristic pre-filter**: 12 known ReDoS patterns checked before execution
+1. **Heuristic pre-filter**: 13 known ReDoS patterns checked before execution
 2. **Process isolation**: Regex runs in a separate `multiprocessing.Process` with `terminate()`/`kill()` fallback
 
 ```python
 # From grep_utils.py - actual implementation
 def safe_grep(pattern, content, max_matches=20, window=100, timeout=GREP_TIMEOUT):
-    # Layer 1: Heuristic pre-filter (12 ReDoS patterns)
+    # Layer 1: Heuristic pre-filter (13 ReDoS patterns)
     if not is_safe_regex(pattern):
         raise ValueError("Potentially dangerous regex pattern rejected.")
 
@@ -308,7 +308,7 @@ When modifying DeepScan:
 - [ ] Validate all file paths before write
 - [ ] Don't expose objects with `__globals__` in REPL namespace
 - [ ] Add new AST node types to whitelist only with justification (create ADR)
-- [ ] Test for path traversal with `..` and symlinks
+- [ ] Test for path traversal with `..` and symlinks (**Known gap**: protections exist in `walker.py` and `ast_chunker.py` but no automated tests yet; see [TEST-PLAN.md](../../../TEST-PLAN.md))
 - [ ] Consider timeout/memory implications of new features
 
 ---

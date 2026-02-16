@@ -82,7 +82,7 @@ For detailed architecture, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 > **Note**: CLI mode provides placeholder results. Full sub-agent processing requires Claude Code environment.
 
-### ⚠️ Model Quality Trade-offs (D2-FIX)
+### Model Quality Trade-offs
 
 DeepScan uses **Haiku** by default for cost efficiency, but this affects analysis quality:
 
@@ -152,7 +152,7 @@ poetry run python .claude/skills/deepscan/scripts/deepscan_engine.py status
 poetry run python .claude/skills/deepscan/scripts/deepscan_engine.py export-results output.json
 ```
 
-## Complete Workflow Example (P5.2)
+## Complete Workflow Example
 
 This section shows the complete `init → map → reduce` workflow with expected outputs.
 
@@ -428,7 +428,7 @@ poetry run python .claude/skills/deepscan/scripts/deepscan_engine.py map --instr
 - **Variables are NOT preserved**: Define and use variables in the same exec call
 - **State management**: Use `add_buffer()`, `add_result()`, `set_final_answer()` for persistence
 
-**Timeout Behavior (Phase 8)**:
+**Timeout Behavior (Phase 7)**:
 - Simple commands: 5 seconds default
 - `write_chunks`: Auto-calculated (2s/MB, min 30s, max 120s)
 - Manual override: `exec -c "..." --timeout 60`
