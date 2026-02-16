@@ -28,6 +28,14 @@ Each sub-agent sees only its chunk, staying within optimal context limits. The a
 - Reading 1-3 specific files (use Read)
 - Simple pattern matching
 
+## Prerequisites
+
+- **Python 3.10+** (uses `X | None` syntax)
+- **pydantic** (`pip install pydantic`)
+- **Claude Code** installed and working
+
+Optional: `tree-sitter-language-pack` (semantic chunking), `xxhash` (faster hashing), `rich` (styled errors), `psutil` (memory-aware chunking).
+
 ## Installation
 
 Add to your Claude Code project as a plugin:
@@ -42,13 +50,30 @@ Or clone and add locally:
 git clone https://github.com/idnotbe/deepscan.git
 ```
 
-## Usage
+Verify the installation:
+
+```bash
+poetry run python .claude/skills/deepscan/scripts/deepscan_engine.py --help
+```
+
+## Quick Example
 
 ```
 /deepscan init ./src -q "Find all security vulnerabilities"
 ```
 
-See the [skill documentation](.claude/skills/deepscan/SKILL.md) for the full command reference.
+After completing the scan workflow (init, chunk, map, reduce, export), you get structured findings:
+
+```json
+{
+  "point": "SQL injection vulnerability",
+  "evidence": "Line 45: query = f\"SELECT * FROM users WHERE id={user_id}\"",
+  "confidence": "high",
+  "location": {"file": "src/db.py", "line": 45}
+}
+```
+
+See the [Getting Started guide](.claude/skills/deepscan/docs/GETTING-STARTED.md) for a complete walkthrough.
 
 ## Specialized Agents
 
@@ -67,6 +92,8 @@ See the [skill documentation](.claude/skills/deepscan/SKILL.md) for the full com
 - **Deduplication**: Similarity threshold 0.7
 - **Model Escalation**: Automatic haiku to sonnet on quality failures
 - **Sandboxed REPL**: Multi-layer security for safe execution
+- **Cancellation**: Graceful Ctrl+C with checkpoint save, double Ctrl+C to force quit
+- **Semantic Chunking**: AST-based chunking for Python, JavaScript, TypeScript, Java, Go
 
 ## Testing
 
@@ -94,10 +121,16 @@ See [TEST-PLAN.md](TEST-PLAN.md) for the full prioritized test plan and [CLAUDE.
 
 ## Documentation
 
-- [SKILL.md](.claude/skills/deepscan/SKILL.md) - Full command reference
-- [Architecture](.claude/skills/deepscan/docs/ARCHITECTURE.md) - System design
-- [Security](.claude/skills/deepscan/docs/SECURITY.md) - Threat model and defenses
-- [Use Cases](.claude/skills/deepscan/docs/USE_CASES.md) - Detailed scenarios
+| Document | Description |
+|----------|-------------|
+| [Getting Started](.claude/skills/deepscan/docs/GETTING-STARTED.md) | Step-by-step tutorial for first-time users |
+| [SKILL.md](.claude/skills/deepscan/SKILL.md) | Skill interface and quick command reference |
+| [Reference](.claude/skills/deepscan/docs/REFERENCE.md) | Complete command, config, and REPL sandbox reference |
+| [Error Codes](.claude/skills/deepscan/docs/ERROR-CODES.md) | All DS-NNN error codes with causes and fixes |
+| [Troubleshooting](.claude/skills/deepscan/docs/TROUBLESHOOTING.md) | Common errors and workflow recipes |
+| [Architecture](.claude/skills/deepscan/docs/ARCHITECTURE.md) | System design |
+| [Security](.claude/skills/deepscan/docs/SECURITY.md) | Threat model and defenses |
+| [Use Cases](.claude/skills/deepscan/docs/USE_CASES.md) | Detailed scenarios |
 
 ## License
 

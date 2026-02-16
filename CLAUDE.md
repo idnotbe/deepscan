@@ -6,10 +6,11 @@ Deep multi-file analysis plugin for Claude Code. Uses chunked map-reduce with pa
 
 | Path | Purpose |
 |------|---------|
-| `.claude/skills/deepscan/scripts/` | All Python source code (17 modules) |
-| `.claude/skills/deepscan/docs/` | Architecture, security model, use cases |
+| `.claude/skills/deepscan/scripts/` | All Python source code (17 modules, ~9560 LOC) |
+| `.claude/skills/deepscan/docs/` | 8 documentation files (architecture, security, reference, error codes, troubleshooting, getting started, use cases, ADR) |
 | `.claude/skills/deepscan/SKILL.md` | Skill trigger and command reference |
-| `.claude-plugin/plugin.json` | Plugin manifest (v0.1.0) |
+| `.claude/skills/deepscan/README.md` | Detailed README with design rationale and development guide |
+| `.claude-plugin/plugin.json` | Plugin manifest (v2.0.0) |
 
 ## Testing
 
@@ -35,6 +36,8 @@ These modules enforce security boundaries and **must have tests before modificat
 | `state_manager.py` | `_safe_write()` with `resolve().relative_to()` path containment (lines 381-398) |
 | `walker.py` | File traversal with `follow_symlinks=False`, max depth enforcement |
 | `ast_chunker.py` | Project-root enforcement via `resolve(strict=True)` + `relative_to()` (lines 400-420) |
+| `grep_utils.py` | Process-isolated regex execution with `terminate()`/`kill()` fallback |
+| `subagent_prompt.py` | Prompt injection defense via XML boundary structure |
 
 ### Known Gaps
 
@@ -59,7 +62,14 @@ Policy enforcement lives in:
 
 ## Documentation
 
-- [README.md](README.md) -- Plugin overview and usage
-- [SECURITY.md](.claude/skills/deepscan/docs/SECURITY.md) -- Threat model and defense-in-depth architecture
-- [ARCHITECTURE.md](.claude/skills/deepscan/docs/ARCHITECTURE.md) -- System design
-- [TEST-PLAN.md](TEST-PLAN.md) -- Prioritized test plan (P0/P1/P2)
+| Document | Description |
+|----------|-------------|
+| [README.md](README.md) | Plugin overview and usage |
+| [Getting Started](.claude/skills/deepscan/docs/GETTING-STARTED.md) | Step-by-step tutorial for first-time users |
+| [Reference](.claude/skills/deepscan/docs/REFERENCE.md) | Complete command, config, and REPL sandbox reference |
+| [Error Codes](.claude/skills/deepscan/docs/ERROR-CODES.md) | All 31 DS-NNN error codes |
+| [Troubleshooting](.claude/skills/deepscan/docs/TROUBLESHOOTING.md) | Common errors and workflow recipes |
+| [Security](.claude/skills/deepscan/docs/SECURITY.md) | Threat model and defense-in-depth architecture |
+| [Architecture](.claude/skills/deepscan/docs/ARCHITECTURE.md) | System design |
+| [Use Cases](.claude/skills/deepscan/docs/USE_CASES.md) | Detailed scenarios |
+| [TEST-PLAN.md](TEST-PLAN.md) | Prioritized test plan (P0/P1/P2) |

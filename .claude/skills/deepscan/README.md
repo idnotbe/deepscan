@@ -331,16 +331,32 @@ Available in `exec -c` commands:
 .claude/skills/deepscan/
 ├── SKILL.md                      # Skill definition (triggers, tools)
 ├── scripts/
-│   ├── __init__.py
+│   ├── __init__.py               # Package init, version declaration
 │   ├── models.py                 # Pydantic schemas (~150 LOC)
-│   ├── deepscan_engine.py        # Main engine (~2500 LOC)
-│   ├── subagent_prompt.py        # Sub-agent prompts (embedded, ~400 LOC)
-│   ├── aggregator.py             # Result aggregation (~600 LOC)
+│   ├── constants.py              # Shared constants, SAFE_BUILTINS (~360 LOC)
+│   ├── deepscan_engine.py        # Main engine + CLI (~2500 LOC)
+│   ├── subagent_prompt.py        # Sub-agent prompts + sanitization (~400 LOC)
+│   ├── aggregator.py             # Result aggregation + FINAL markers (~600 LOC)
 │   ├── checkpoint.py             # Checkpoint management (~280 LOC)
-│   ├── cancellation.py           # Work cancellation (~460 LOC)
-│   ├── incremental.py            # Delta analysis (~530 LOC)
-│   ├── error_codes.py            # Error code system (~450 LOC)
-│   └── ast_chunker.py            # Semantic chunking (~1000 LOC)
+│   ├── cancellation.py           # Work cancellation, double-tap Ctrl+C (~460 LOC)
+│   ├── incremental.py            # Delta analysis, file hashing (~530 LOC)
+│   ├── error_codes.py            # Error code system, 31 codes (~450 LOC)
+│   ├── ast_chunker.py            # Semantic chunking with tree-sitter (~1000 LOC)
+│   ├── state_manager.py          # State persistence, session lifecycle (~730 LOC)
+│   ├── repl_executor.py          # Subprocess REPL with resource limits (~310 LOC)
+│   ├── helpers.py                # REPL helper functions factory (~650 LOC)
+│   ├── walker.py                 # Directory traversal, tree view (~220 LOC)
+│   ├── grep_utils.py             # ReDoS-protected grep, process isolation (~170 LOC)
+│   └── progress.py               # Progress streaming, escalation logic (~180 LOC)
+├── docs/
+│   ├── GETTING-STARTED.md        # Tutorial: first scan walkthrough
+│   ├── REFERENCE.md              # Complete command/config/REPL reference
+│   ├── ERROR-CODES.md            # All 31 DS-NNN error codes
+│   ├── TROUBLESHOOTING.md        # Common errors and workflow recipes
+│   ├── ARCHITECTURE.md           # System design
+│   ├── SECURITY.md               # Threat model and defenses
+│   ├── USE_CASES.md              # Detailed scenarios
+│   └── ADR-001-repl-security-relaxation.md
 └── README.md                     # This file
 ```
 
@@ -370,7 +386,7 @@ Available in `exec -c` commands:
 
 > **Resolved (2026-01-26)**: Background task output timing issue has been fixed
 > by switching to foreground mode. Parallel execution is maintained via multiple
-> Task calls in a single message. See ERROR_REPORT_DEEPSCAN_SKILLS.md Issue #5.
+> Task calls in a single message.
 
 ### 1. CLI Mode vs Claude Code Environment
 
@@ -455,7 +471,14 @@ poetry run bandit -r .claude/skills/deepscan/scripts/
 - `error_codes.py`: ~450 LOC (Error handling)
 - `checkpoint.py`: ~280 LOC (Checkpoint management)
 - `models.py`: ~150 LOC (Pydantic schemas)
-- **Total**: ~6370 LOC (excluding tests)
+- `state_manager.py`: ~730 LOC (State persistence)
+- `helpers.py`: ~650 LOC (REPL helper functions)
+- `constants.py`: ~360 LOC (Shared constants)
+- `repl_executor.py`: ~310 LOC (Subprocess REPL)
+- `walker.py`: ~220 LOC (Directory traversal)
+- `progress.py`: ~180 LOC (Progress streaming)
+- `grep_utils.py`: ~170 LOC (ReDoS-protected grep)
+- **Total**: ~9560 LOC (excluding tests)
 
 ## Roadmap
 
@@ -468,10 +491,12 @@ poetry run bandit -r .claude/skills/deepscan/scripts/
 - Phase 6: Error code system + work cancellation
 - Phase 7: Full feature integration + documentation
 
-### Phase 8 (Future): Semantic Chunking
-- AST-based chunking for language-aware boundaries
+### Phase 8 (Future)
 - Cross-file dependency tracking
 - Improved aggregation with semantic deduplication
+
+> **Note**: AST-based semantic chunking is already implemented in `ast_chunker.py` (~1000 LOC).
+> Use `write_chunks(semantic=True)` to enable it.
 
 ## Contributing
 
@@ -484,10 +509,17 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for system design and extension
 
 ## References
 
-- **Architecture**: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - System design and data flow
-- **Security**: [docs/SECURITY.md](docs/SECURITY.md) - Threat model and defense layers
-- **ADR-001**: [docs/ADR-001-repl-security-relaxation.md](docs/ADR-001-repl-security-relaxation.md) - REPL security decisions
+| Document | Description |
+|----------|-------------|
+| [Getting Started](docs/GETTING-STARTED.md) | Step-by-step tutorial for first-time users |
+| [Reference](docs/REFERENCE.md) | Complete command, config, and REPL sandbox reference |
+| [Error Codes](docs/ERROR-CODES.md) | All 31 DS-NNN error codes |
+| [Troubleshooting](docs/TROUBLESHOOTING.md) | Common errors and workflow recipes |
+| [Architecture](docs/ARCHITECTURE.md) | System design and data flow |
+| [Security](docs/SECURITY.md) | Threat model and defense layers |
+| [Use Cases](docs/USE_CASES.md) | Detailed scenarios |
+| [ADR-001](docs/ADR-001-repl-security-relaxation.md) | REPL security decisions |
 
 ## License
 
-Part of Ops project.
+MIT License - See [LICENSE](../../LICENSE) for details.

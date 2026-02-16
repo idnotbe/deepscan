@@ -119,7 +119,7 @@ map --escalate
 
 ## 7. Analysis Focus Areas
 
-> **Note**: Specialized agent types are fully implemented (Phase 8).
+> **Note**: Specialized agent types are fully implemented (Phase 7).
 > Use the `--agent-type` flag or the `-q` query parameter to focus your analysis.
 
 | Focus Area | Agent Type Flag | Query Example |
@@ -145,6 +145,26 @@ map --escalate
 | **Large refactoring** | Re-analyze affected chunks only |
 
 **Performance**: 3-10x faster for typical incremental changes (5-10% files modified)
+
+**Step-by-step:**
+```bash
+# 1. Complete a baseline scan and note the session hash
+init ./src -q "Security audit"
+# ... complete full workflow (chunk, map, reduce) ...
+export-results baseline.json
+
+# 2. Make code changes, then run incremental scan
+init ./src -q "Security audit" --incremental --previous-session <baseline_hash>
+# Output shows: [Incremental] Changed/added files: 3, Deleted files: 1
+
+# 3. Continue with normal workflow - only changed files are in context
+exec -c "paths = write_chunks(size=150000); print(f'{len(paths)} chunks')"
+map
+reduce
+export-results delta.json
+```
+
+> **Tip**: Install `xxhash` (`pip install xxhash`) for 3-5x faster file hashing.
 
 ---
 
@@ -237,7 +257,61 @@ data/fixtures/*.json
 
 ---
 
-## 11. MAP Phase Pagination
+## 11. Cancellation and Recovery
+
+### Graceful Cancellation (Single Ctrl+C)
+The current batch finishes, a checkpoint is saved, and resume instructions are printed:
+```
+[CANCEL] Cancellation requested, saving progress...
+Resume this session:
+  deepscan resume deepscan_1739700000_a1b2c3d4e5f6g7h8
+```
+
+### Force Quit (Double Ctrl+C)
+The process terminates immediately (exit code 130). The in-progress batch is not saved, but previously completed batches are intact.
+
+### Resuming After Interruption
+```bash
+# Find your session
+list
+
+# Resume most recent session
+resume
+
+# Continue processing (skips completed chunks automatically)
+map
+```
+
+See [Troubleshooting: How to Cancel a Running Scan](TROUBLESHOOTING.md#how-to-cancel-a-running-scan) for details.
+
+---
+
+## 12. REPL Custom Analysis Examples
+
+Use the REPL for ad-hoc analysis between workflow steps:
+
+```bash
+# Count files by extension
+exec -c "exts = {}; [exts.__setitem__(f.rsplit('.',1)[-1], exts.get(f.rsplit('.',1)[-1],0)+1) for f in get_status()['files']]; print(sorted(exts.items(), key=lambda x: -x[1]))"
+
+# Find the largest files in context
+exec -c "print(f'Context: {context_length():,} characters')"
+
+# Search for patterns with context
+exec -c "matches = grep('def .*\\(.*request.*\\)', max_matches=50); print(f'{len(matches)} request handlers found')"
+
+# Lazy mode: preview a directory before loading
+exec -c "print(preview_dir('src/api', max_depth=3))"
+
+# Lazy mode: load and search a specific file
+exec -c "content = load_file('src/api/auth.py'); print(content[:500])"
+```
+
+For the complete list of REPL helpers, see [Reference: Helper Functions](REFERENCE.md#helper-functions).
+
+---
+
+## 13. MAP Phase Pagination
 
 > **New Feature (Issue #5)**: Handle large chunk counts efficiently.
 

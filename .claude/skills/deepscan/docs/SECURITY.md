@@ -2,6 +2,22 @@
 
 > **Purpose**: This document describes the security model of DeepScan, focusing on the REPL execution boundary and defense-in-depth strategy.
 
+## Security at a Glance
+
+| Layer | Protection | Location |
+|-------|-----------|----------|
+| Forbidden patterns | 15 regex patterns block dangerous strings | `deepscan_engine.py:345-361` |
+| AST whitelist | Only safe node types allowed | `deepscan_engine.py:382-441` |
+| Attribute blocking | 19 dangerous dunder attributes blocked | `deepscan_engine.py:453-459` |
+| Safe builtins | 36 allowed builtins (no `getattr`, `exec`, `open`) | `constants.py:109-148` |
+| Resource limits | 256MB/512MB memory, 60s/120s CPU (Unix only) | `repl_executor.py:82-94` |
+| Write isolation | Only `~/.claude/cache/deepscan/` writable | `state_manager.py:381-398` |
+| Grep isolation | Process-isolated regex with 10s timeout | `grep_utils.py:83-166` |
+| Path containment | `resolve().relative_to()` enforcement | `ast_chunker.py:400-420` |
+
+For the complete REPL sandbox reference, see [Reference: REPL Sandbox](REFERENCE.md#repl-sandbox).
+For error codes related to security, see [Error Codes](ERROR-CODES.md).
+
 ## 1. Threat Model
 
 ### 1.1 Attack Vectors
@@ -70,8 +86,9 @@ User Input (code)
       |  - SafeHelpers class (no __globals__ exposure)
       v
 [Layer 5] Resource Limits
-      |  - 5-second timeout
-      |  - No process isolation (ThreadPoolExecutor limitation)
+      |  - 5-second timeout (default; auto-calculated for write_chunks)
+      |  - Subprocess isolation (Process with terminate/kill)
+      |  - Unix resource limits: 256MB/512MB memory, 60s/120s CPU
       v
 Execution
 ```
@@ -112,15 +129,19 @@ getattr(obj, attr)  # Constructs "__class__" at runtime!
 
 ### 3.3 Known Limitations
 
-**ThreadPoolExecutor Timeout:**
-- `future.result(timeout=N)` only stops waiting, doesn't kill the thread
-- Malicious infinite loops continue as "zombie threads"
-- **Mitigation**: For production, use `multiprocessing.Process` with `terminate()`
+**Simple code execution** uses `SafeREPLExecutor` (subprocess with `Process.terminate()`). Infinite loops are terminated after timeout.
 
-**Memory DoS:**
-- No memory limits in current implementation
-- `x = [1] * 10**9` can exhaust system memory
-- **Mitigation**: Use Docker with `--memory` flag or `resource.setrlimit()`
+**Helper-path execution** uses a daemon thread in the main process (requires `StateManager` closure). This path has a known zombie thread limitation:
+- `Thread.join(timeout=N)` only stops waiting, does not kill the thread
+- Malicious infinite loops continue as "zombie threads" until process exit
+- `daemon=True` ensures threads do not block process exit
+- **Mitigation**: AST validation prevents most dangerous constructs; subprocess path is used when helpers are not needed
+
+**Resource Limits (Unix only):**
+- Memory: 256MB soft / 512MB hard (`RLIMIT_AS`)
+- CPU time: 60s soft / 120s hard (`RLIMIT_CPU`)
+- File size: 10MB (`RLIMIT_FSIZE`)
+- **Not available on Windows**: The `resource` module is Unix-only. On Windows, the sandbox runs without these limits. Use Docker with `--memory` and `--cpus` flags for production use on Windows.
 
 ---
 
@@ -203,9 +224,12 @@ state.model_dump_json()
 # pickle.dump(state, f)  # FORBIDDEN
 ```
 
-### 6.2 Optional HMAC Signature
+### 6.2 HMAC Signature (Not Yet Implemented)
+
+The following HMAC signing approach is planned but **not yet implemented** in the codebase:
 
 ```python
+# PLANNED - not currently in any module
 def save_with_signature(state: DeepScanState, path: Path):
     data = state.model_dump_json()
     signature = hmac.new(
@@ -217,7 +241,7 @@ def save_with_signature(state: DeepScanState, path: Path):
     path.write_text(json.dumps(output))
 ```
 
-Signing key is machine-specific, stored in `~/.claude/cache/deepscan/.signing_key`.
+Until implemented, state files are protected by write isolation (Section 4.1) and filesystem permissions only.
 
 ---
 
@@ -245,23 +269,32 @@ The random suffix uses `secrets.token_hex(8)` (cryptographically secure).
 | Attack | Protection |
 |--------|------------|
 | Infinite loop | 5-second timeout (Layer 5) |
-| Regex catastrophic backtracking | Timeout on `grep()` + pattern complexity check |
-| Large allocation | Docker memory limits (recommended) |
+| Regex catastrophic backtracking | Process-isolated grep with 10s timeout + ReDoS pattern detection |
+| Large allocation | `resource.setrlimit` 256MB/512MB (Unix); Docker `--memory` (Windows) |
 | Chunk bomb (tiny chunks) | Overlap ratio limited to 50% of chunk size |
-| Symlink loop | Max depth: 10 |
+| Symlink loop | `follow_symlinks=False` in walker; max depth enforcement |
 
 ### 8.1 ReDoS Prevention
 
-```python
-def grep(pattern: str, max_matches: int = 20):
-    # Pattern complexity check
-    if len(pattern) > 100 or pattern.count('*') > 3:
-        raise ValueError("Pattern too complex")
+Grep uses two-layer protection via `grep_utils.py`:
 
-    # Timeout-protected execution
-    with ThreadPoolExecutor() as executor:
-        future = executor.submit(find_matches)
-        return future.result(timeout=1.0)  # 1 second max
+1. **Heuristic pre-filter**: 12 known ReDoS patterns checked before execution
+2. **Process isolation**: Regex runs in a separate `multiprocessing.Process` with `terminate()`/`kill()` fallback
+
+```python
+# From grep_utils.py - actual implementation
+def safe_grep(pattern, content, max_matches=20, window=100, timeout=GREP_TIMEOUT):
+    # Layer 1: Heuristic pre-filter (12 ReDoS patterns)
+    if not is_safe_regex(pattern):
+        raise ValueError("Potentially dangerous regex pattern rejected.")
+
+    # Layer 2: Process isolation with terminate
+    proc = Process(target=_grep_worker, args=(...), daemon=True)
+    proc.start()
+    proc.join(timeout=timeout)  # GREP_TIMEOUT = 10 seconds
+
+    if proc.is_alive():
+        proc.terminate()  # Forcibly kill stuck regex
 ```
 
 ---
@@ -290,6 +323,9 @@ When modifying DeepScan:
 
 ## References
 
-- [ARCHITECTURE.md](./ARCHITECTURE.md) - System architecture
-- [SKILL.md](../SKILL.md) - Usage and troubleshooting
-- [Python Jail Escape Techniques](https://book.hacktricks.xyz/generic-methodologies-and-resources/python/bypass-python-sandboxes) - External reference
+- [Reference](REFERENCE.md) - Complete REPL sandbox reference (builtins, allowed/blocked syntax)
+- [Error Codes](ERROR-CODES.md) - Security-related error codes (DS-201, DS-202, DS-203, DS-204)
+- [Troubleshooting](TROUBLESHOOTING.md) - "Forbidden pattern detected" and sandbox errors
+- [Architecture](ARCHITECTURE.md) - System architecture
+- [SKILL.md](../SKILL.md) - Usage and command reference
+- [ADR-001](ADR-001-repl-security-relaxation.md) - REPL security decisions

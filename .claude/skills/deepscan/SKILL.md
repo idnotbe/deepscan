@@ -99,6 +99,9 @@ map --instructions
 ### 5. REDUCE (Aggregate)
 
 ```bash
+# Aggregate findings with deduplication
+reduce
+
 # Check progress
 progress
 
@@ -115,6 +118,17 @@ status                  # Current status
 abort <hash>            # Delete session
 clean --older-than 7    # Remove old sessions
 ```
+
+## CLI Shortcuts
+
+| Shortcut | Expands to | Description |
+|----------|------------|-------------|
+| `?` | `status` | Show current session status |
+| `! "code"` | `exec -c "code"` | Execute REPL expression |
+| `+` | `resume` | Resume most recent session |
+| `+ hash` | `resume hash` | Resume specific session |
+| `x hash` | `abort hash` | Abort (delete) a session |
+| `<path>` | `init <path>` | Initialize scan if path exists |
 
 ## Helper Functions (REPL)
 
@@ -195,15 +209,14 @@ Automatic upgrade from haiku to sonnet on quality/complexity failures.
 
 ## Troubleshooting
 
-| Error | Solution |
-|-------|----------|
-| "No state found" | Run `init` first |
-| "Forbidden pattern" | Use allowed helpers, not `__import__` |
-| "File too large" | Files >10MB skipped |
-| Windows Unicode | Set `$env:PYTHONIOENCODING='utf-8'` |
+See [Troubleshooting](docs/TROUBLESHOOTING.md) for error recovery guides and [Error Codes](docs/ERROR-CODES.md) for the full error reference (all 31 DS-NNN codes).
 
 ## References
 
-- **Use Cases**: See `docs/USE_CASES.md` for detailed scenarios
-- **Architecture**: See `docs/ARCHITECTURE.md`
-- **Security**: See `docs/SECURITY.md`
+- **New? Start here**: [Getting Started](docs/GETTING-STARTED.md)
+- **Full Reference**: [Reference](docs/REFERENCE.md) -- commands, config, REPL sandbox
+- **Error Codes**: [Error Codes](docs/ERROR-CODES.md) -- all DS-NNN codes
+- **Troubleshooting**: [Troubleshooting](docs/TROUBLESHOOTING.md) -- common errors, workflows
+- **Use Cases**: [Use Cases](docs/USE_CASES.md) -- detailed scenarios
+- **Architecture**: [Architecture](docs/ARCHITECTURE.md) -- system design
+- **Security**: [Security](docs/SECURITY.md) -- threat model and defenses

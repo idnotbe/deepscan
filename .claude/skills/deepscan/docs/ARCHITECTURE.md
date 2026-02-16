@@ -148,7 +148,7 @@ Sub-agents process individual chunks using Claude Code's Task tool:
 - Architecture: Design pattern analysis (`--agent-type architecture`)
 - Performance: Bottleneck identification (`--agent-type performance`)
 
-> **Note**: The `--agent-type` CLI flag is fully implemented (Phase 8). Use `-q` query for additional context.
+> **Note**: The `--agent-type` CLI flag is fully implemented (Phase 7). Use `-q` query for additional context.
 
 ### 3.5 Aggregator
 
@@ -265,21 +265,32 @@ Uses `secrets.token_hex(8)` for cryptographic randomness.
 |-- README.md              # Entry point, usage guide
 |-- SKILL.md               # Claude interface definition
 |-- docs/
+|   |-- GETTING-STARTED.md # Tutorial walkthrough
+|   |-- REFERENCE.md       # Complete command/config/REPL reference
+|   |-- ERROR-CODES.md     # All 31 DS-NNN error codes
+|   |-- TROUBLESHOOTING.md # Common errors and workflow recipes
 |   |-- ARCHITECTURE.md    # This file
 |   |-- SECURITY.md        # Security architecture
-|   +-- ADR-001-repl-security-relaxation.md  # REPL security decision
+|   |-- USE_CASES.md       # Detailed scenarios
+|   +-- ADR-001-repl-security-relaxation.md
 +-- scripts/
-    |-- __init__.py
-    |-- deepscan_engine.py # Main engine (~2500 LOC)
-    |-- models.py          # Pydantic schemas (~150 LOC)
-    |-- aggregator.py      # Result aggregation (~600 LOC)
-    |-- checkpoint.py      # Checkpoint management (~280 LOC)
-    |-- cancellation.py    # Work cancellation (~460 LOC)
-    |-- incremental.py     # Delta analysis (~530 LOC)
-    |-- error_codes.py     # Error handling (~450 LOC)
-    |-- ast_chunker.py     # Semantic chunking (~1000 LOC)
-    |-- subagent_prompt.py # Sub-agent prompts (~400 LOC)
-    +-- ...
+    |-- __init__.py           # Package init (~30 LOC)
+    |-- deepscan_engine.py    # Main engine + CLI (~2500 LOC)
+    |-- models.py             # Pydantic schemas (~150 LOC)
+    |-- constants.py          # Shared constants, SAFE_BUILTINS (~360 LOC)
+    |-- aggregator.py         # Result aggregation (~600 LOC)
+    |-- subagent_prompt.py    # Sub-agent prompts (~400 LOC)
+    |-- ast_chunker.py        # Semantic chunking (~1000 LOC)
+    |-- state_manager.py      # State persistence (~730 LOC)
+    |-- helpers.py            # REPL helper functions (~650 LOC)
+    |-- incremental.py        # Delta analysis (~530 LOC)
+    |-- cancellation.py       # Work cancellation (~460 LOC)
+    |-- error_codes.py        # Error code system (~450 LOC)
+    |-- checkpoint.py         # Checkpoint management (~280 LOC)
+    |-- repl_executor.py      # Subprocess REPL (~310 LOC)
+    |-- walker.py             # Directory traversal (~220 LOC)
+    |-- progress.py           # Progress streaming (~180 LOC)
+    +-- grep_utils.py         # ReDoS-protected grep (~170 LOC)
 
 ~/.claude/cache/deepscan/{session_hash}/
 |-- state.json             # Main state file
@@ -298,7 +309,7 @@ Uses `secrets.token_hex(8)` for cryptographic randomness.
 
 ### 7.1 Adding Custom Agent Types
 
-> **Status**: ✅ Fully implemented (Phase 8). CLI `--agent-type` flag is connected.
+> **Status**: Fully implemented (Phase 7). CLI `--agent-type` flag is connected.
 
 The system supports agent type specialization via `AGENT_TYPE_INSTRUCTIONS`:
 
@@ -359,6 +370,11 @@ Override aggregation in `aggregator.py`:
 
 ## References
 
-- [SKILL.md](../SKILL.md) - Workflow and helper function documentation
-- [SECURITY.md](./SECURITY.md) - Security architecture
-- [ADR-001](./ADR-001-repl-security-relaxation.md) - REPL security decisions
+- [Getting Started](GETTING-STARTED.md) - Step-by-step tutorial
+- [Reference](REFERENCE.md) - Complete command, config, and REPL reference
+- [Error Codes](ERROR-CODES.md) - All 31 DS-NNN error codes
+- [Troubleshooting](TROUBLESHOOTING.md) - Common errors and workflow recipes
+- [Security](SECURITY.md) - Security architecture and threat model
+- [Use Cases](USE_CASES.md) - Detailed scenarios
+- [SKILL.md](../SKILL.md) - Skill interface and command reference
+- [ADR-001](ADR-001-repl-security-relaxation.md) - REPL security decisions
