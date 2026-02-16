@@ -6,7 +6,7 @@ Deep multi-file analysis plugin for Claude Code. Uses chunked map-reduce with pa
 
 | Path | Purpose |
 |------|---------|
-| `.claude/skills/deepscan/scripts/` | All Python source code (17 modules, ~9560 LOC) |
+| `.claude/skills/deepscan/scripts/` | All Python source code (17 modules, ~9040 LOC) |
 | `.claude/skills/deepscan/docs/` | 8 documentation files (architecture, security, reference, error codes, troubleshooting, getting started, use cases, ADR) |
 | `.claude/skills/deepscan/SKILL.md` | Skill trigger and command reference |
 | `.claude/skills/deepscan/README.md` | Detailed README with design rationale and development guide |
