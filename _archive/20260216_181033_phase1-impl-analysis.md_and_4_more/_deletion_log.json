@@ -1,0 +1,22 @@
+{
+  "timestamp": "2026-02-16T09:10:33.741981+00:00",
+  "command": "mv /home/idnotbe/projects/deepscan/tmp/phase1-impl-analysis.md /home/idnotbe/projects/deepscan/temp/ && rmdir /home/idnotbe/projects/deepscan/tmp 2>/dev/null; ls /home/idnotbe/projects/deepscan/temp/",
+  "files": [
+    {
+      "original": "/home/idnotbe/projects/deepscan/tmp/phase1-impl-analysis.md",
+      "archived": "/home/idnotbe/projects/deepscan/_archive/20260216_181033_phase1-impl-analysis.md_and_4_more/tmp/phase1-impl-analysis.md"
+    },
+    {
+      "original": "/home/idnotbe/projects/deepscan/temp",
+      "archived": "/home/idnotbe/projects/deepscan/_archive/20260216_181033_phase1-impl-analysis.md_and_4_more/temp"
+    },
+    {
+      "original": "/home/idnotbe/projects/deepscan/tmp",
+      "archived": "/home/idnotbe/projects/deepscan/_archive/20260216_181033_phase1-impl-analysis.md_and_4_more/tmp_cdb14a"
+    },
+    {
+      "original": "/home/idnotbe/projects/deepscan/temp",
+      "archived": "/home/idnotbe/projects/deepscan/_archive/20260216_181033_phase1-impl-analysis.md_and_4_more/temp_498f76"
+    }
+  ]
+}
