@@ -118,7 +118,7 @@ Security-critical components that need test coverage:
 - `walker.py` -- symlink safety, path traversal protection
 - `ast_chunker.py` -- project-root enforcement
 
-See [TEST-PLAN.md](TEST-PLAN.md) for the full prioritized test plan and [CLAUDE.md](CLAUDE.md) for developer guidance.
+See [test-plan.md](action-plans/test-plan.md) for the full prioritized test plan and [CLAUDE.md](CLAUDE.md) for developer guidance.
 
 ## Documentation
 

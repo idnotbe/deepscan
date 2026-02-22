@@ -308,7 +308,7 @@ When modifying DeepScan:
 - [ ] Validate all file paths before write
 - [ ] Don't expose objects with `__globals__` in REPL namespace
 - [ ] Add new AST node types to whitelist only with justification (create ADR)
-- [ ] Test for path traversal with `..` and symlinks (**Known gap**: protections exist in `walker.py` and `ast_chunker.py` but no automated tests yet; see [TEST-PLAN.md](../../../TEST-PLAN.md))
+- [ ] Test for path traversal with `..` and symlinks (**Known gap**: protections exist in `walker.py` and `ast_chunker.py` but no automated tests yet; see [test-plan.md](../../../../action-plans/test-plan.md))
 - [ ] Consider timeout/memory implications of new features
 
 ---

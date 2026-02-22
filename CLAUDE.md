@@ -72,4 +72,16 @@ Policy enforcement lives in:
 | [Security](.claude/skills/deepscan/docs/SECURITY.md) | Threat model and defense-in-depth architecture |
 | [Architecture](.claude/skills/deepscan/docs/ARCHITECTURE.md) | System design |
 | [Use Cases](.claude/skills/deepscan/docs/USE_CASES.md) | Detailed scenarios |
-| [TEST-PLAN.md](TEST-PLAN.md) | Prioritized test plan (P0/P1/P2) |
+| [test-plan.md](action-plans/test-plan.md) | Prioritized test plan (P0/P1/P2) |
+
+## Action Plans
+
+실행 계획 파일은 `action-plans/`에 있다. 각 파일 상단에 YAML frontmatter로 상태를 관리한다.
+
+- `status`: not-started | active | blocked | done
+- `progress`: 현재 진행 상태 (자유 텍스트)
+
+**규칙:**
+- plan 파일 작업 시작/완료 시 frontmatter의 status와 progress를 업데이트할 것
+- 완료된 plan은 `action-plans/_done/`으로 이동 (선택)
+- `action-plans/_ref/`는 참고/역사적 문서
